@@ -1,3 +1,40 @@
+export interface Author {
+  sys: {
+    id: string;
+  };
+  name: string;
+  picture: {
+    sys: {
+      id: string;
+    };
+    url: string;
+  }
+}
+
+export interface BlogProps {
+  sys: {
+    id: string;
+  };
+  title: string;
+  slug: string;
+  content: any;
+  excerpt: string;
+  coverImage: {
+    sys: {
+      id: string;
+    };
+    url: string;
+  }
+  date: string;
+  
+  author: Author;
+}
+
+export interface AllBlogs {
+  post: BlogProps,
+  morePosts: Array<BlogProps>
+}
+
 const POST_GRAPHQL_FIELDS = `
   slug
   title
@@ -6,7 +43,7 @@ const POST_GRAPHQL_FIELDS = `
   }
   date
   author {
-    name
+    firstName
     picture {
       url
     }
@@ -42,7 +79,6 @@ async function fetchGraphQL(query: string, preview = false): Promise<any> {
         }`,
       },
       body: JSON.stringify({ query }),
-      next: { tags: ["posts"] },
     },
   ).then((response) => response.json());
 }
@@ -52,13 +88,17 @@ function extractPost(fetchResponse: any): any {
 }
 
 function extractPostEntries(fetchResponse: any): any[] {
+  // console.log(`fetchResponse ${JSON.stringify(fetchResponse)}`);
+  // console.log(`fetchResponse?.data ${JSON.stringify(fetchResponse?.data)}`);
+  // console.log(`fetchResponse?.data?.postCollection ${fetchResponse?.data?.postCollection}`);
+  // console.log(`fetchResponse?.data?.postCollection?.items ${fetchResponse?.data?.postCollection?.items}`);
   return fetchResponse?.data?.postCollection?.items;
 }
 
 export async function getPreviewPostBySlug(slug: string | null): Promise<any> {
   const entry = await fetchGraphQL(
     `query {
-      postCollection(where: { slug: "${slug}" }, preview: true, limit: 1) {
+      postCollection(where: { slug: "${slug}" }, preview: true, limit: 20) {
         items {
           ${POST_GRAPHQL_FIELDS}
         }
@@ -88,12 +128,12 @@ export async function getAllPosts(isDraftMode: boolean): Promise<any[]> {
 export async function getPostAndMorePosts(
   slug: string,
   preview: boolean,
-): Promise<any> {
+): Promise<AllBlogs> {
   const entry = await fetchGraphQL(
     `query {
       postCollection(where: { slug: "${slug}" }, preview: ${
         preview ? "true" : "false"
-      }, limit: 1) {
+      }, limit: 20) {
         items {
           ${POST_GRAPHQL_FIELDS}
         }
@@ -105,7 +145,7 @@ export async function getPostAndMorePosts(
     `query {
       postCollection(where: { slug_not_in: "${slug}" }, order: date_DESC, preview: ${
         preview ? "true" : "false"
-      }, limit: 2) {
+      }, limit: 20) {
         items {
           ${POST_GRAPHQL_FIELDS}
         }
