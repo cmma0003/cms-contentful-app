@@ -88,10 +88,6 @@ function extractPost(fetchResponse: any): any {
 }
 
 function extractPostEntries(fetchResponse: any): any[] {
-  // console.log(`fetchResponse ${JSON.stringify(fetchResponse)}`);
-  // console.log(`fetchResponse?.data ${JSON.stringify(fetchResponse?.data)}`);
-  // console.log(`fetchResponse?.data?.postCollection ${fetchResponse?.data?.postCollection}`);
-  // console.log(`fetchResponse?.data?.postCollection?.items ${fetchResponse?.data?.postCollection?.items}`);
   return fetchResponse?.data?.postCollection?.items;
 }
 
